@@ -43,6 +43,12 @@ int main(int argc, char *argv[])
         krunnerCfg->group(QStringLiteral("State")),
         &app);
     resultsModel->setLimit(20);
+    const QStringList favoriteIds = krunnerCfg->group(QStringLiteral("Plugins"))
+                                        .group(QStringLiteral("Favorites"))
+                                        .readEntry(QStringLiteral("plugins"), QStringList());
+    if (!favoriteIds.isEmpty()) {
+        resultsModel->setFavoriteIds(favoriteIds);
+    }
 
     auto *historyModel = new HistoryModel(&app);
 
