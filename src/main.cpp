@@ -487,6 +487,7 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("kadrunner"));
     app.setApplicationDisplayName(QStringLiteral("KadRunner"));
+    app.setWindowIcon(QIcon::fromTheme(QStringLiteral("kadrunner")));
     app.setQuitOnLastWindowClosed(false);
     QCoreApplication::setQuitLockEnabled(false);
 

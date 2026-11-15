@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=KadRunner
+GenericName=Application Launcher
+Comment=Ulauncher-style KRunner frontend
+Exec=kadrunner
+Icon=kadrunner
+Categories=Utility;KDE;Qt;
+StartupNotify=false

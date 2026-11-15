@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
+include(GNUInstallDirs)
+
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick Qml Network)
 find_package(KF6Runner REQUIRED)
 find_package(KF6Config REQUIRED)
@@ -34,4 +36,17 @@ target_link_libraries(kadrunner PRIVATE
     KF6::CoreAddons
     KF6::GlobalAccel
     LayerShellQt::Interface
+)
+
+install(TARGETS kadrunner
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+install(FILES data/kadrunner.desktop
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications
+)
+install(FILES icons/kadrunner.svg
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/scalable/apps
+)
+install(FILES data/kadrunner.service
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/systemd/user
 )
