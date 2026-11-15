@@ -6,6 +6,7 @@ Item {
 
     required property var historyModel
     signal interacted()
+    signal moveRequested(int dx, int dy)
     signal resetPositionRequested()
 
     ColumnLayout {
@@ -208,7 +209,97 @@ Item {
             spacing: 12
 
             Text {
-                text: "Drag panel to move · Drag right edge to resize width"
+                text: "Horizontal position"
+                color: "#cfd4dc"
+                font.pixelSize: 15
+                Layout.fillWidth: true
+            }
+
+            Row {
+                spacing: 8
+
+                Rectangle {
+                    width: 30; height: 30; radius: 6
+                    color: xLeftMouse.containsMouse ? "#3a3d42" : "#323438"
+                    border.width: 1; border.color: "#44474e"
+                    Text { anchors.centerIn: parent; text: "◀"; color: "#eceff4"; font.pixelSize: 12 }
+                    MouseArea {
+                        id: xLeftMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                        onClicked: { settingsPanel.moveRequested(-40, 0); settingsPanel.interacted() }
+                    }
+                }
+
+                Text {
+                    width: 64; height: 30
+                    text: settingsPanel.historyModel.posX < 0 ? "Centered" : settingsPanel.historyModel.posX + "px"
+                    color: "#eceff4"; font.pixelSize: 13
+                    horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                }
+
+                Rectangle {
+                    width: 30; height: 30; radius: 6
+                    color: xRightMouse.containsMouse ? "#3a3d42" : "#323438"
+                    border.width: 1; border.color: "#44474e"
+                    Text { anchors.centerIn: parent; text: "▶"; color: "#eceff4"; font.pixelSize: 12 }
+                    MouseArea {
+                        id: xRightMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                        onClicked: { settingsPanel.moveRequested(40, 0); settingsPanel.interacted() }
+                    }
+                }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 12
+
+            Text {
+                text: "Vertical position"
+                color: "#cfd4dc"
+                font.pixelSize: 15
+                Layout.fillWidth: true
+            }
+
+            Row {
+                spacing: 8
+
+                Rectangle {
+                    width: 30; height: 30; radius: 6
+                    color: yUpMouse.containsMouse ? "#3a3d42" : "#323438"
+                    border.width: 1; border.color: "#44474e"
+                    Text { anchors.centerIn: parent; text: "▲"; color: "#eceff4"; font.pixelSize: 12 }
+                    MouseArea {
+                        id: yUpMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                        onClicked: { settingsPanel.moveRequested(0, -40); settingsPanel.interacted() }
+                    }
+                }
+
+                Text {
+                    width: 64; height: 30
+                    text: settingsPanel.historyModel.posY + "px"
+                    color: "#eceff4"; font.pixelSize: 13
+                    horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                }
+
+                Rectangle {
+                    width: 30; height: 30; radius: 6
+                    color: yDownMouse.containsMouse ? "#3a3d42" : "#323438"
+                    border.width: 1; border.color: "#44474e"
+                    Text { anchors.centerIn: parent; text: "▼"; color: "#eceff4"; font.pixelSize: 12 }
+                    MouseArea {
+                        id: yDownMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                        onClicked: { settingsPanel.moveRequested(0, 40); settingsPanel.interacted() }
+                    }
+                }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 12
+
+            Text {
+                text: "Drag right edge to resize width"
                 color: "#7a808a"
                 font.pixelSize: 12
                 Layout.fillWidth: true

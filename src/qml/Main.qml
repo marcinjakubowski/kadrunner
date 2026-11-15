@@ -7,7 +7,7 @@ Window {
     readonly property int searchBarHeight: 66
     readonly property int rowHeight: 68
     readonly property int maxVisibleRows: runnerBridge.historyModel.maxVisibleRows
-    readonly property int settingsHeight: 232
+    readonly property int settingsHeight: 316
     property bool settingsOpen: false
 
     readonly property bool showingHistory: searchBar.text.length === 0
@@ -113,38 +113,14 @@ Window {
                 visible: root.contentHeight > 0
             }
 
-            Item {
+            SettingsPanel {
                 width: parent.width
                 height: root.settingsHeight
                 visible: root.settingsOpen
-
-                // Drag background of settings panel to reposition the launcher
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.SizeAllCursor
-                    property real startX: 0
-                    property real startY: 0
-                    onPressed: function(mouse) {
-                        startX = mouse.x
-                        startY = mouse.y
-                    }
-                    onPositionChanged: function(mouse) {
-                        if (pressed) {
-                            const dx = Math.round(mouse.x - startX)
-                            const dy = Math.round(mouse.y - startY)
-                            if (dx !== 0 || dy !== 0) {
-                                runnerBridge.moveBy(dx, dy)
-                            }
-                        }
-                    }
-                }
-
-                SettingsPanel {
-                    anchors.fill: parent
-                    historyModel: runnerBridge.historyModel
-                    onInteracted: searchBar.focusInput()
-                    onResetPositionRequested: runnerBridge.resetPosition()
-                }
+                historyModel: runnerBridge.historyModel
+                onInteracted: searchBar.focusInput()
+                onMoveRequested: function(dx, dy) { runnerBridge.moveBy(dx, dy) }
+                onResetPositionRequested: runnerBridge.resetPosition()
             }
 
             ListView {
