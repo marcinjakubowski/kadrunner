@@ -299,7 +299,7 @@ Item {
             spacing: 12
 
             Text {
-                text: "Drag panel to move · Drag right edge to resize width"
+                text: "Drag panel to move (snaps to center) · Drag right edge to resize"
                 color: "#7a808a"
                 font.pixelSize: 12
                 Layout.fillWidth: true

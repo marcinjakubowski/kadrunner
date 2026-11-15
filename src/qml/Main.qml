@@ -9,6 +9,9 @@ Window {
     readonly property int maxVisibleRows: runnerBridge.historyModel.maxVisibleRows
     readonly property int settingsHeight: 316
     property bool settingsOpen: false
+    property bool isDragging: false
+    property bool snappedCenterX: false
+    property bool snappedCenterY: false
 
     readonly property bool showingHistory: searchBar.text.length === 0
     readonly property int resultCount: settingsOpen ? 0 : resultsList.count
@@ -56,6 +59,27 @@ Window {
             root.settingsOpen = false
             searchBar.focusInput()
         }
+    }
+
+    // Center snap guide lines (visible while dragging in design mode)
+    Rectangle {
+        visible: root.settingsOpen && root.isDragging && root.snappedCenterX
+        x: Math.round(root.width / 2)
+        y: 0
+        width: 1
+        height: root.height
+        color: "#6194e8"
+        opacity: 0.85
+    }
+
+    Rectangle {
+        visible: root.settingsOpen && root.isDragging && root.snappedCenterY
+        x: 0
+        y: Math.round(root.height / 2)
+        width: root.width
+        height: 1
+        color: "#6194e8"
+        opacity: 0.85
     }
 
     Rectangle {
@@ -156,17 +180,50 @@ Window {
                         pressY = globalPt.y
                         startPosX = frame.x
                         startPosY = frame.y
+                        root.isDragging = true
+                        root.snappedCenterX = false
+                        root.snappedCenterY = false
                     }
                     onPositionChanged: function(mouse) {
-                        if (pressed) {
-                            const globalPt = mapToItem(null, mouse.x, mouse.y)
-                            const maxX = Math.max(0, root.width - frame.width)
-                            const maxY = Math.max(0, root.height - frame.height)
-                            runnerBridge.historyModel.posX = Math.max(0, Math.min(maxX, Math.round(startPosX + globalPt.x - pressX)))
-                            runnerBridge.historyModel.posY = Math.max(0, Math.min(maxY, Math.round(startPosY + globalPt.y - pressY)))
+                        if (!pressed) {
+                            return
                         }
+                        const globalPt = mapToItem(null, mouse.x, mouse.y)
+                        const dx = Math.round(globalPt.x - pressX)
+                        const dy = Math.round(globalPt.y - pressY)
+
+                        const maxX = Math.max(0, root.width - frame.width)
+                        const maxY = Math.max(0, root.height - frame.height)
+                        const centerX = Math.round(maxX / 2)
+                        const centerY = Math.round(maxY / 2)
+                        const snapThreshold = 12
+
+                        let nextX = Math.max(0, Math.min(maxX, startPosX + dx))
+                        let nextY = Math.max(0, Math.min(maxY, startPosY + dy))
+
+                        if (Math.abs(nextX - centerX) <= snapThreshold) {
+                            nextX = centerX
+                            root.snappedCenterX = true
+                        } else {
+                            root.snappedCenterX = false
+                        }
+
+                        if (Math.abs(nextY - centerY) <= snapThreshold) {
+                            nextY = centerY
+                            root.snappedCenterY = true
+                        } else {
+                            root.snappedCenterY = false
+                        }
+
+                        runnerBridge.historyModel.posX = nextX
+                        runnerBridge.historyModel.posY = nextY
                     }
-                    onReleased: searchBar.focusInput()
+                    onReleased: {
+                        root.isDragging = false
+                        root.snappedCenterX = false
+                        root.snappedCenterY = false
+                        searchBar.focusInput()
+                    }
                 }
 
                 SettingsPanel {
