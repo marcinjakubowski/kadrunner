@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 
 Window {
     id: root
@@ -249,6 +250,18 @@ Window {
                 currentIndex: 0
                 boundsBehavior: Flickable.StopAtBounds
                 highlightMoveDuration: 0
+
+                ScrollBar.vertical: ScrollBar {
+                    policy: resultsList.count > root.maxVisibleRows ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
+                    width: 6
+                    padding: 1
+                    contentItem: Rectangle {
+                        implicitWidth: 4
+                        radius: 2
+                        color: parent.pressed || parent.hovered ? "#888e99" : "#555963"
+                    }
+                    background: Item {}
+                }
 
                 onCountChanged: {
                     if (currentIndex < 0 || currentIndex >= count) {
