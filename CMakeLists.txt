@@ -18,6 +18,12 @@ qt_add_executable(kadrunner
     src/main.cpp
 )
 
+qt_policy(SET QTP0001 NEW)
+
+set_source_files_properties(src/Main.qml PROPERTIES
+    QT_RESOURCE_ALIAS Main.qml
+)
+
 qt_add_qml_module(kadrunner
     URI KadRunner
     VERSION 1.0
