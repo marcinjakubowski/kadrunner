@@ -31,12 +31,15 @@ public:
     Q_INVOKABLE bool runHistoryRow(int row);
     Q_INVOKABLE void hide();
     Q_INVOKABLE void show();
+    Q_INVOKABLE void moveBy(int dx, int dy);
+    Q_INVOKABLE void resetPosition();
     void toggle();
 
 Q_SIGNALS:
     void shown();
 
 private:
+    void applyLayerGeometry();
     KRunner::ResultsModel *m_model = nullptr;
     HistoryModel *m_history = nullptr;
     QQmlComponent *m_windowComponent = nullptr;

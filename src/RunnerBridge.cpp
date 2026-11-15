@@ -1,16 +1,19 @@
 #include "RunnerBridge.h"
 #include "HistoryModel.h"
 
+#include <QGuiApplication>
 #include <QMargins>
 #include <QModelIndex>
 #include <QQmlComponent>
 #include <QQuickWindow>
+#include <QScreen>
 
 #include <KRunner/QueryMatch>
 #include <KRunner/ResultsModel>
 #include <KRunner/RunnerManager>
 #include <LayerShellQt/Window>
 
+#include <algorithm>
 #include <memory>
 
 RunnerBridge::RunnerBridge(KRunner::ResultsModel *model,
@@ -118,21 +121,66 @@ void RunnerBridge::show()
         return;
     }
 
-    if (auto *layerWin = LayerShellQt::Window::get(win)) {
-        layerWin->setWantsToBeOnActiveScreen(true);
-        layerWin->setLayer(LayerShellQt::Window::LayerOverlay);
-        layerWin->setAnchors(LayerShellQt::Window::AnchorTop);
-        layerWin->setMargins(QMargins(0, 220, 0, 0));
-        layerWin->setKeyboardInteractivity(LayerShellQt::Window::KeyboardInteractivityExclusive);
-        layerWin->setExclusiveZone(-1);
-        layerWin->setScope(QStringLiteral("kadrunner"));
-    }
-
     m_window = win;
+    applyLayerGeometry();
     m_window->show();
     m_window->raise();
     m_window->requestActivate();
     emit shown();
+}
+
+void RunnerBridge::applyLayerGeometry()
+{
+    if (!m_window) {
+        return;
+    }
+    auto *layerWin = LayerShellQt::Window::get(m_window);
+    if (!layerWin) {
+        return;
+    }
+    layerWin->setWantsToBeOnActiveScreen(true);
+    layerWin->setLayer(LayerShellQt::Window::LayerOverlay);
+    layerWin->setKeyboardInteractivity(LayerShellQt::Window::KeyboardInteractivityExclusive);
+    layerWin->setExclusiveZone(-1);
+    layerWin->setScope(QStringLiteral("kadrunner"));
+
+    if (m_history->posX() < 0) {
+        layerWin->setAnchors(LayerShellQt::Window::AnchorTop);
+        layerWin->setMargins(QMargins(0, m_history->posY(), 0, 0));
+    } else {
+        layerWin->setAnchors(LayerShellQt::Window::Anchors(LayerShellQt::Window::AnchorTop | LayerShellQt::Window::AnchorLeft));
+        layerWin->setMargins(QMargins(m_history->posX(), m_history->posY(), 0, 0));
+    }
+}
+
+void RunnerBridge::moveBy(int dx, int dy)
+{
+    if (!m_window || (dx == 0 && dy == 0)) {
+        return;
+    }
+    QScreen *scr = m_window->screen();
+    if (!scr) {
+        scr = QGuiApplication::primaryScreen();
+    }
+    const QRect bounds = scr ? scr->geometry() : QRect(0, 0, 2560, 1440);
+
+    int currentX = m_history->posX();
+    if (currentX < 0) {
+        currentX = std::max(0, (bounds.width() - m_window->width()) / 2);
+    }
+    const int maxX = std::max(0, bounds.width() - m_window->width());
+    const int maxY = std::max(0, bounds.height() - m_window->height());
+
+    m_history->setPosX(std::clamp(currentX + dx, 0, maxX));
+    m_history->setPosY(std::clamp(m_history->posY() + dy, 0, maxY));
+    applyLayerGeometry();
+}
+
+void RunnerBridge::resetPosition()
+{
+    m_history->setPosX(-1);
+    m_history->setPosY(220);
+    applyLayerGeometry();
 }
 
 void RunnerBridge::toggle()

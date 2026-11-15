@@ -6,11 +6,12 @@ Item {
 
     required property var historyModel
     signal interacted()
+    signal resetPositionRequested()
 
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 20
-        spacing: 14
+        spacing: 12
 
         RowLayout {
             Layout.fillWidth: true
@@ -35,7 +36,7 @@ Item {
                         required property var modelData
                         readonly property bool selected: settingsPanel.historyModel.mode === modelData.value
                         width: modeLabel.implicitWidth + 20
-                        height: 32
+                        height: 30
                         radius: 6
                         color: selected ? "#4b6eaf" : (modeMouse.containsMouse ? "#3a3d42" : "#323438")
                         border.width: 1
@@ -80,73 +81,166 @@ Item {
                 spacing: 8
 
                 Rectangle {
-                    width: 32
-                    height: 32
-                    radius: 6
+                    width: 30; height: 30; radius: 6
                     color: minusMouse.containsMouse ? "#3a3d42" : "#323438"
-                    border.width: 1
-                    border.color: "#44474e"
-                    Text {
-                        anchors.centerIn: parent
-                        text: "−"
-                        color: "#eceff4"
-                        font.pixelSize: 16
-                    }
+                    border.width: 1; border.color: "#44474e"
+                    Text { anchors.centerIn: parent; text: "−"; color: "#eceff4"; font.pixelSize: 16 }
                     MouseArea {
-                        id: minusMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
+                        id: minusMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                         enabled: settingsPanel.historyModel.mode !== "off"
-                        onClicked: {
-                            settingsPanel.historyModel.maxItems -= 1
-                            settingsPanel.interacted()
-                        }
+                        onClicked: { settingsPanel.historyModel.maxItems -= 1; settingsPanel.interacted() }
                     }
                 }
 
                 Text {
-                    width: 28
-                    height: 32
+                    width: 36; height: 30
                     text: settingsPanel.historyModel.maxItems
-                    color: "#eceff4"
-                    font.pixelSize: 15
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
+                    color: "#eceff4"; font.pixelSize: 14
+                    horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                 }
 
                 Rectangle {
-                    width: 32
-                    height: 32
-                    radius: 6
+                    width: 30; height: 30; radius: 6
                     color: plusMouse.containsMouse ? "#3a3d42" : "#323438"
-                    border.width: 1
-                    border.color: "#44474e"
-                    Text {
-                        anchors.centerIn: parent
-                        text: "+"
-                        color: "#eceff4"
-                        font.pixelSize: 16
-                    }
+                    border.width: 1; border.color: "#44474e"
+                    Text { anchors.centerIn: parent; text: "+"; color: "#eceff4"; font.pixelSize: 16 }
                     MouseArea {
-                        id: plusMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
+                        id: plusMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                         enabled: settingsPanel.historyModel.mode !== "off"
-                        onClicked: {
-                            settingsPanel.historyModel.maxItems += 1
-                            settingsPanel.interacted()
-                        }
+                        onClicked: { settingsPanel.historyModel.maxItems += 1; settingsPanel.interacted() }
                     }
                 }
             }
         }
 
-        Text {
-            text: "Hotkey: System Settings → Keyboard → Shortcuts → KadRunner (default Meta / Meta+/)"
-            color: "#7a808a"
-            font.pixelSize: 12
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 12
+
+            Text {
+                text: "Launcher width"
+                color: "#cfd4dc"
+                font.pixelSize: 15
+                Layout.fillWidth: true
+            }
+
+            Row {
+                spacing: 8
+
+                Rectangle {
+                    width: 30; height: 30; radius: 6
+                    color: wMinusMouse.containsMouse ? "#3a3d42" : "#323438"
+                    border.width: 1; border.color: "#44474e"
+                    Text { anchors.centerIn: parent; text: "−"; color: "#eceff4"; font.pixelSize: 16 }
+                    MouseArea {
+                        id: wMinusMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                        onClicked: { settingsPanel.historyModel.launcherWidth -= 40; settingsPanel.interacted() }
+                    }
+                }
+
+                Text {
+                    width: 56; height: 30
+                    text: settingsPanel.historyModel.launcherWidth + "px"
+                    color: "#eceff4"; font.pixelSize: 14
+                    horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                }
+
+                Rectangle {
+                    width: 30; height: 30; radius: 6
+                    color: wPlusMouse.containsMouse ? "#3a3d42" : "#323438"
+                    border.width: 1; border.color: "#44474e"
+                    Text { anchors.centerIn: parent; text: "+"; color: "#eceff4"; font.pixelSize: 16 }
+                    MouseArea {
+                        id: wPlusMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                        onClicked: { settingsPanel.historyModel.launcherWidth += 40; settingsPanel.interacted() }
+                    }
+                }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 12
+
+            Text {
+                text: "Max visible result rows"
+                color: "#cfd4dc"
+                font.pixelSize: 15
+                Layout.fillWidth: true
+            }
+
+            Row {
+                spacing: 8
+
+                Rectangle {
+                    width: 30; height: 30; radius: 6
+                    color: rMinusMouse.containsMouse ? "#3a3d42" : "#323438"
+                    border.width: 1; border.color: "#44474e"
+                    Text { anchors.centerIn: parent; text: "−"; color: "#eceff4"; font.pixelSize: 16 }
+                    MouseArea {
+                        id: rMinusMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                        onClicked: { settingsPanel.historyModel.maxVisibleRows -= 1; settingsPanel.interacted() }
+                    }
+                }
+
+                Text {
+                    width: 36; height: 30
+                    text: settingsPanel.historyModel.maxVisibleRows
+                    color: "#eceff4"; font.pixelSize: 14
+                    horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                }
+
+                Rectangle {
+                    width: 30; height: 30; radius: 6
+                    color: rPlusMouse.containsMouse ? "#3a3d42" : "#323438"
+                    border.width: 1; border.color: "#44474e"
+                    Text { anchors.centerIn: parent; text: "+"; color: "#eceff4"; font.pixelSize: 16 }
+                    MouseArea {
+                        id: rPlusMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                        onClicked: { settingsPanel.historyModel.maxVisibleRows += 1; settingsPanel.interacted() }
+                    }
+                }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 12
+
+            Text {
+                text: "Drag panel to move · Drag right edge to resize width"
+                color: "#7a808a"
+                font.pixelSize: 12
+                Layout.fillWidth: true
+            }
+
+            Rectangle {
+                width: resetLabel.implicitWidth + 20
+                height: 28
+                radius: 6
+                color: resetMouse.containsMouse ? "#3a3d42" : "#323438"
+                border.width: 1
+                border.color: "#44474e"
+
+                Text {
+                    id: resetLabel
+                    anchors.centerIn: parent
+                    text: "Center Position"
+                    color: "#c5cad3"
+                    font.pixelSize: 12
+                }
+
+                MouseArea {
+                    id: resetMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        settingsPanel.resetPositionRequested()
+                        settingsPanel.interacted()
+                    }
+                }
+            }
         }
     }
 }

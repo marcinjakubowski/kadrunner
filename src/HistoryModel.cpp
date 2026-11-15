@@ -54,6 +54,50 @@ void HistoryModel::setMaxItems(int maxItems)
     emit settingsChanged();
 }
 
+void HistoryModel::setLauncherWidth(int width)
+{
+    const int clamped = std::clamp(width, 480, 1400);
+    if (m_launcherWidth == clamped) {
+        return;
+    }
+    m_launcherWidth = clamped;
+    saveSettings();
+    emit settingsChanged();
+}
+
+void HistoryModel::setMaxVisibleRows(int rows)
+{
+    const int clamped = std::clamp(rows, 3, 12);
+    if (m_maxVisibleRows == clamped) {
+        return;
+    }
+    m_maxVisibleRows = clamped;
+    saveSettings();
+    emit settingsChanged();
+}
+
+void HistoryModel::setPosX(int x)
+{
+    const int clamped = x < 0 ? -1 : std::clamp(x, 0, 3840);
+    if (m_posX == clamped) {
+        return;
+    }
+    m_posX = clamped;
+    saveSettings();
+    emit settingsChanged();
+}
+
+void HistoryModel::setPosY(int y)
+{
+    const int clamped = std::clamp(y, 0, 2160);
+    if (m_posY == clamped) {
+        return;
+    }
+    m_posY = clamped;
+    saveSettings();
+    emit settingsChanged();
+}
+
 int HistoryModel::rowCount(const QModelIndex &parent) const
 {
     if (parent.isValid() || m_mode == QLatin1String("off")) {
@@ -182,6 +226,11 @@ void HistoryModel::loadSettings()
         m_mode = m;
     }
     m_maxItems = std::clamp(obj.value(QStringLiteral("maxItems")).toInt(5), 1, 10);
+    m_launcherWidth = std::clamp(obj.value(QStringLiteral("launcherWidth")).toInt(760), 480, 1400);
+    m_maxVisibleRows = std::clamp(obj.value(QStringLiteral("maxVisibleRows")).toInt(8), 3, 12);
+    const int px = obj.value(QStringLiteral("posX")).toInt(-1);
+    m_posX = px < 0 ? -1 : std::clamp(px, 0, 3840);
+    m_posY = std::clamp(obj.value(QStringLiteral("posY")).toInt(220), 0, 2160);
 }
 
 void HistoryModel::saveSettings() const
@@ -189,6 +238,10 @@ void HistoryModel::saveSettings() const
     QJsonObject obj;
     obj.insert(QStringLiteral("mode"), m_mode);
     obj.insert(QStringLiteral("maxItems"), m_maxItems);
+    obj.insert(QStringLiteral("launcherWidth"), m_launcherWidth);
+    obj.insert(QStringLiteral("maxVisibleRows"), m_maxVisibleRows);
+    obj.insert(QStringLiteral("posX"), m_posX);
+    obj.insert(QStringLiteral("posY"), m_posY);
     QFile f(m_cfgPath);
     if (f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
         f.write(QJsonDocument(obj).toJson(QJsonDocument::Compact));

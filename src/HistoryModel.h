@@ -29,6 +29,10 @@ class HistoryModel : public QAbstractListModel
     Q_OBJECT
     Q_PROPERTY(QString mode READ mode WRITE setMode NOTIFY settingsChanged)
     Q_PROPERTY(int maxItems READ maxItems WRITE setMaxItems NOTIFY settingsChanged)
+    Q_PROPERTY(int launcherWidth READ launcherWidth WRITE setLauncherWidth NOTIFY settingsChanged)
+    Q_PROPERTY(int maxVisibleRows READ maxVisibleRows WRITE setMaxVisibleRows NOTIFY settingsChanged)
+    Q_PROPERTY(int posX READ posX WRITE setPosX NOTIFY settingsChanged)
+    Q_PROPERTY(int posY READ posY WRITE setPosY NOTIFY settingsChanged)
 
 public:
     enum Roles {
@@ -45,6 +49,18 @@ public:
 
     int maxItems() const { return m_maxItems; }
     void setMaxItems(int maxItems);
+
+    int launcherWidth() const { return m_launcherWidth; }
+    void setLauncherWidth(int width);
+
+    int maxVisibleRows() const { return m_maxVisibleRows; }
+    void setMaxVisibleRows(int rows);
+
+    int posX() const { return m_posX; }
+    void setPosX(int x);
+
+    int posY() const { return m_posY; }
+    void setPosY(int y);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
@@ -68,5 +84,9 @@ private:
     QString m_cfgPath;
     QString m_mode = QStringLiteral("often");
     int m_maxItems = 5;
+    int m_launcherWidth = 760;
+    int m_maxVisibleRows = 8;
+    int m_posX = -1;
+    int m_posY = 220;
     QList<HistoryEntry> m_entries;
 };

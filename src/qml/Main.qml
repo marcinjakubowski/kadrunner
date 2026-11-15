@@ -3,11 +3,11 @@ import QtQuick
 Window {
     id: root
 
-    readonly property int launcherWidth: 760
+    readonly property int launcherWidth: runnerBridge.historyModel.launcherWidth
     readonly property int searchBarHeight: 66
     readonly property int rowHeight: 68
-    readonly property int maxVisibleRows: 8
-    readonly property int settingsHeight: 148
+    readonly property int maxVisibleRows: runnerBridge.historyModel.maxVisibleRows
+    readonly property int settingsHeight: 232
     property bool settingsOpen: false
 
     readonly property bool showingHistory: searchBar.text.length === 0
@@ -113,12 +113,38 @@ Window {
                 visible: root.contentHeight > 0
             }
 
-            SettingsPanel {
+            Item {
                 width: parent.width
                 height: root.settingsHeight
                 visible: root.settingsOpen
-                historyModel: runnerBridge.historyModel
-                onInteracted: searchBar.focusInput()
+
+                // Drag background of settings panel to reposition the launcher
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.SizeAllCursor
+                    property real startX: 0
+                    property real startY: 0
+                    onPressed: function(mouse) {
+                        startX = mouse.x
+                        startY = mouse.y
+                    }
+                    onPositionChanged: function(mouse) {
+                        if (pressed) {
+                            const dx = Math.round(mouse.x - startX)
+                            const dy = Math.round(mouse.y - startY)
+                            if (dx !== 0 || dy !== 0) {
+                                runnerBridge.moveBy(dx, dy)
+                            }
+                        }
+                    }
+                }
+
+                SettingsPanel {
+                    anchors.fill: parent
+                    historyModel: runnerBridge.historyModel
+                    onInteracted: searchBar.focusInput()
+                    onResetPositionRequested: runnerBridge.resetPosition()
+                }
             }
 
             ListView {
@@ -144,6 +170,36 @@ Window {
                     onHovered: function(row) { resultsList.currentIndex = row }
                     onActivated: function(row) { root.activateRow(row) }
                 }
+            }
+        }
+
+        // Right-edge resize handle when settings are open
+        Rectangle {
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
+            width: 8
+            visible: root.settingsOpen
+            color: resizeMouse.containsMouse || resizeMouse.pressed ? "#4b6eaf" : "transparent"
+
+            MouseArea {
+                id: resizeMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.SizeHorCursor
+                property real startX: 0
+                onPressed: function(mouse) {
+                    startX = mouse.x
+                }
+                onPositionChanged: function(mouse) {
+                    if (pressed) {
+                        const dx = Math.round(mouse.x - startX)
+                        if (dx !== 0) {
+                            runnerBridge.historyModel.launcherWidth += dx
+                        }
+                    }
+                }
+                onReleased: searchBar.focusInput()
             }
         }
     }
