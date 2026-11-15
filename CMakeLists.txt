@@ -16,19 +16,36 @@ find_package(LayerShellQt REQUIRED)
 
 qt_add_executable(kadrunner
     src/main.cpp
+    src/HistoryModel.h
+    src/HistoryModel.cpp
+    src/RunnerBridge.h
+    src/RunnerBridge.cpp
+    src/SingleInstance.h
+    src/SingleInstance.cpp
 )
 
 qt_policy(SET QTP0001 NEW)
 
-set_source_files_properties(src/Main.qml PROPERTIES
-    QT_RESOURCE_ALIAS Main.qml
+set_source_files_properties(
+    src/qml/Main.qml
+    src/qml/SearchBar.qml
+    src/qml/SettingsPanel.qml
+    src/qml/ResultDelegate.qml
+    PROPERTIES QT_RESOURCE_ALIAS ""
 )
+set_source_files_properties(src/qml/Main.qml PROPERTIES QT_RESOURCE_ALIAS Main.qml)
+set_source_files_properties(src/qml/SearchBar.qml PROPERTIES QT_RESOURCE_ALIAS SearchBar.qml)
+set_source_files_properties(src/qml/SettingsPanel.qml PROPERTIES QT_RESOURCE_ALIAS SettingsPanel.qml)
+set_source_files_properties(src/qml/ResultDelegate.qml PROPERTIES QT_RESOURCE_ALIAS ResultDelegate.qml)
 
 qt_add_qml_module(kadrunner
     URI KadRunner
     VERSION 1.0
     QML_FILES
-        src/Main.qml
+        src/qml/Main.qml
+        src/qml/SearchBar.qml
+        src/qml/SettingsPanel.qml
+        src/qml/ResultDelegate.qml
 )
 
 target_link_libraries(kadrunner PRIVATE
