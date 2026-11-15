@@ -420,6 +420,7 @@ public:
         }
 
         if (auto *layerWin = LayerShellQt::Window::get(win)) {
+            layerWin->setWantsToBeOnActiveScreen(true);
             layerWin->setLayer(LayerShellQt::Window::LayerOverlay);
             layerWin->setAnchors(LayerShellQt::Window::AnchorTop);
             layerWin->setMargins(QMargins(0, 220, 0, 0));
@@ -487,6 +488,7 @@ int main(int argc, char *argv[])
     app.setApplicationName(QStringLiteral("kadrunner"));
     app.setApplicationDisplayName(QStringLiteral("KadRunner"));
     app.setQuitOnLastWindowClosed(false);
+    QCoreApplication::setQuitLockEnabled(false);
 
     const auto krunnerCfg = KSharedConfig::openConfig(QStringLiteral("krunnerrc"));
     const KConfigGroup cfgGroup = krunnerCfg->group(QStringLiteral("General"));
@@ -511,7 +513,10 @@ int main(int argc, char *argv[])
     // Register global hotkey with KDE KGlobalAccel (works natively on Wayland)
     auto *toggleAction = new QAction(QStringLiteral("Toggle KadRunner"), &app);
     toggleAction->setObjectName(QStringLiteral("toggle"));
-    KGlobalAccel::setGlobalShortcut(toggleAction, QKeySequence(QStringLiteral("Meta+/")));
+    KGlobalAccel::setGlobalShortcut(toggleAction, QList<QKeySequence>{
+        QKeySequence(QStringLiteral("Meta")),
+        QKeySequence(QStringLiteral("Meta+/")),
+    });
     QObject::connect(toggleAction, &QAction::triggered, bridge, &RunnerBridge::toggle);
 
     // Start IPC server for CLI/shortcut toggling
