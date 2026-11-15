@@ -15,12 +15,15 @@ Window {
     readonly property int contentHeight: settingsOpen
         ? settingsHeight + 1
         : (resultCount > 0 ? Math.min(resultCount, maxVisibleRows) * rowHeight + 1 : 0)
+    readonly property int panelHeight: searchBarHeight + contentHeight
 
-    width: launcherWidth
-    height: searchBarHeight + contentHeight
+    width: settingsOpen ? runnerBridge.activeScreenWidth() : launcherWidth
+    height: settingsOpen ? runnerBridge.activeScreenHeight() : panelHeight
     visible: false
     color: "transparent"
     flags: Qt.FramelessWindowHint
+
+    onSettingsOpenChanged: runnerBridge.setDesignMode(settingsOpen)
 
     function activateRow(idx) {
         if (showingHistory) {
@@ -45,13 +48,34 @@ Window {
         }
     }
 
-    Rectangle {
+    // Click outside the launcher while settings are open to exit settings mode
+    MouseArea {
         anchors.fill: parent
+        visible: root.settingsOpen
+        onClicked: {
+            root.settingsOpen = false
+            searchBar.focusInput()
+        }
+    }
+
+    Rectangle {
+        id: frame
+        x: root.settingsOpen ? Math.max(0, runnerBridge.historyModel.posX) : 0
+        y: root.settingsOpen ? runnerBridge.historyModel.posY : 0
+        width: root.launcherWidth
+        height: root.panelHeight
         radius: 10
         color: "#2b2c2f"
         border.width: 1
         border.color: "#3f4146"
         clip: true
+
+        // Prevent clicks inside frame from hitting the outside-click MouseArea
+        MouseArea {
+            anchors.fill: parent
+            enabled: root.settingsOpen
+            acceptedButtons: Qt.AllButtons
+        }
 
         Column {
             anchors.fill: parent
@@ -113,14 +137,49 @@ Window {
                 visible: root.contentHeight > 0
             }
 
-            SettingsPanel {
+            Item {
                 width: parent.width
                 height: root.settingsHeight
                 visible: root.settingsOpen
-                historyModel: runnerBridge.historyModel
-                onInteracted: searchBar.focusInput()
-                onMoveRequested: function(dx, dy) { runnerBridge.moveBy(dx, dy) }
-                onResetPositionRequested: runnerBridge.resetPosition()
+
+                // Smooth drag anywhere on the settings panel background
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.SizeAllCursor
+                    property real pressX: 0
+                    property real pressY: 0
+                    property int startPosX: 0
+                    property int startPosY: 0
+                    onPressed: function(mouse) {
+                        const globalPt = mapToItem(null, mouse.x, mouse.y)
+                        pressX = globalPt.x
+                        pressY = globalPt.y
+                        startPosX = frame.x
+                        startPosY = frame.y
+                    }
+                    onPositionChanged: function(mouse) {
+                        if (pressed) {
+                            const globalPt = mapToItem(null, mouse.x, mouse.y)
+                            const maxX = Math.max(0, root.width - frame.width)
+                            const maxY = Math.max(0, root.height - frame.height)
+                            runnerBridge.historyModel.posX = Math.max(0, Math.min(maxX, Math.round(startPosX + globalPt.x - pressX)))
+                            runnerBridge.historyModel.posY = Math.max(0, Math.min(maxY, Math.round(startPosY + globalPt.y - pressY)))
+                        }
+                    }
+                    onReleased: searchBar.focusInput()
+                }
+
+                SettingsPanel {
+                    anchors.fill: parent
+                    historyModel: runnerBridge.historyModel
+                    onInteracted: searchBar.focusInput()
+                    onMoveRequested: function(dx, dy) { runnerBridge.moveBy(dx, dy) }
+                    onResetPositionRequested: {
+                        runnerBridge.resetPosition()
+                        const centeredX = Math.max(0, Math.round((root.width - frame.width) / 2))
+                        runnerBridge.historyModel.posX = centeredX
+                    }
+                }
             }
 
             ListView {
@@ -163,16 +222,17 @@ Window {
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.SizeHorCursor
-                property real startX: 0
+                property real pressX: 0
+                property int startWidth: 0
                 onPressed: function(mouse) {
-                    startX = mouse.x
+                    const globalPt = mapToItem(null, mouse.x, mouse.y)
+                    pressX = globalPt.x
+                    startWidth = runnerBridge.historyModel.launcherWidth
                 }
                 onPositionChanged: function(mouse) {
                     if (pressed) {
-                        const dx = Math.round(mouse.x - startX)
-                        if (dx !== 0) {
-                            runnerBridge.historyModel.launcherWidth += dx
-                        }
+                        const globalPt = mapToItem(null, mouse.x, mouse.y)
+                        runnerBridge.historyModel.launcherWidth = startWidth + Math.round(globalPt.x - pressX)
                     }
                 }
                 onReleased: searchBar.focusInput()

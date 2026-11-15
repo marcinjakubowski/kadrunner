@@ -33,6 +33,9 @@ public:
     Q_INVOKABLE void show();
     Q_INVOKABLE void moveBy(int dx, int dy);
     Q_INVOKABLE void resetPosition();
+    Q_INVOKABLE void setDesignMode(bool enabled);
+    Q_INVOKABLE int activeScreenWidth() const;
+    Q_INVOKABLE int activeScreenHeight() const;
     void toggle();
 
 Q_SIGNALS:

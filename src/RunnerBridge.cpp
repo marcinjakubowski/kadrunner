@@ -180,7 +180,53 @@ void RunnerBridge::resetPosition()
 {
     m_history->setPosX(-1);
     m_history->setPosY(220);
-    applyLayerGeometry();
+    if (m_window) {
+        applyLayerGeometry();
+    }
+}
+
+int RunnerBridge::activeScreenWidth() const
+{
+    QScreen *scr = m_window ? m_window->screen() : QGuiApplication::primaryScreen();
+    if (!scr) {
+        scr = QGuiApplication::primaryScreen();
+    }
+    return scr ? scr->geometry().width() : 2560;
+}
+
+int RunnerBridge::activeScreenHeight() const
+{
+    QScreen *scr = m_window ? m_window->screen() : QGuiApplication::primaryScreen();
+    if (!scr) {
+        scr = QGuiApplication::primaryScreen();
+    }
+    return scr ? scr->geometry().height() : 1440;
+}
+
+void RunnerBridge::setDesignMode(bool enabled)
+{
+    if (!m_window) {
+        return;
+    }
+    auto *layerWin = LayerShellQt::Window::get(m_window);
+    if (!layerWin) {
+        return;
+    }
+
+    if (enabled) {
+        if (m_history->posX() < 0) {
+            const int centeredX = std::max(0, (activeScreenWidth() - m_history->launcherWidth()) / 2);
+            m_history->setPosX(centeredX);
+        }
+        layerWin->setAnchors(LayerShellQt::Window::Anchors(
+            LayerShellQt::Window::AnchorTop |
+            LayerShellQt::Window::AnchorBottom |
+            LayerShellQt::Window::AnchorLeft |
+            LayerShellQt::Window::AnchorRight));
+        layerWin->setMargins(QMargins(0, 0, 0, 0));
+    } else {
+        applyLayerGeometry();
+    }
 }
 
 void RunnerBridge::toggle()
