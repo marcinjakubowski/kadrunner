@@ -1,15 +1,12 @@
 #pragma once
 
+#include <KRunner/ResultsModel>
 #include <QObject>
+
+#include "HistoryModel.h"
 
 class QQmlComponent;
 class QQuickWindow;
-
-namespace KRunner {
-class ResultsModel;
-}
-
-class HistoryModel;
 
 /**
  * Bridges KRunner::ResultsModel and HistoryModel to QML, and manages
